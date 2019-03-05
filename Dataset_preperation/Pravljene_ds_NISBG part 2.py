@@ -122,8 +122,7 @@ vreme_izmedju_voz = vreme_izmedju_voz[vreme_izmedju_voz['br_voz_min']>0]
 
 dataset.to_csv('dataset.csv')
 vreme_izmedju_voz.to_csv('vreme_izmedju_voz.csv')
-mu_vreme.to_csv('mu.csv')
-#plt.hist(vreme_izmedju_voz,bins = 15)
+mu_vreme.to_csv('mu_vreme.csv')
     
 
 

@@ -3,7 +3,6 @@ import tensorflow as tf
 import os
 
 
-
 class LSTM:
     
     def __init__(self, input_size=1, output_size=1, lstm_size=128, num_layers=1,
@@ -79,7 +78,7 @@ class LSTM:
 
 
     """ TRAIN GRAPH """    
-    def train_lstm_graph(name, self):
+    def train_lstm_graph(name, self, train_X, train_y, test_X, test_y):
         """
         name (str)
         lstm_graph (tf.Graph)
@@ -87,10 +86,6 @@ class LSTM:
         def batches(x, batchsize):
             for i in range(0, x.shape[0], batchsize):
                 yield x[i:i+batchsize]
-        
-        stock_dataset = load_data(name,
-                                  input_size=self.input_size,
-                                  num_steps=self.num_steps)
     
         final_prediction = []
         final_loss = None
@@ -117,19 +112,22 @@ class LSTM:
             learning_rate = graph.get_tensor_by_name('learning_rate:0')
     
             test_data_feed = {
-                inputs: stock_dataset.test_X,
-                targets: stock_dataset.test_y,
+                inputs: test_X,
+                targets: test_y,
                 learning_rate: 0.0
             }
     
             loss = graph.get_tensor_by_name('train/loss_mse:0')
             minimize = graph.get_operation_by_name('train/loss_mse_adam_minimize')
             prediction = graph.get_tensor_by_name('output_layer/prediction:0')
-    
+            
+            train_X = list(batches(train_X,self.batch_size))
+            train_y = list(batches(train_y,self.batch_size))
+            
             for epoch_step in range(self.max_epoch):
                 current_lr = learning_rates_to_use[epoch_step]
     
-                for batch_X, batch_y in stock_dataset.generate_one_epoch(self.batch_size):
+                for batch_X, batch_y in train_X, train_y:
                     train_data_feed = {
                         inputs: batch_X,
                         targets: batch_y,
@@ -143,7 +141,7 @@ class LSTM:
                     if epoch_step % 50 == 0:
                         print("Predictions:", [(
                             map(lambda x: round(x, 4), _pred[-j]),
-                            map(lambda x: round(x, 4), stock_dataset.test_y[-j])
+                            map(lambda x: round(x, 4), test_y[-j])
                         ) for j in range(5)])
     
                 writer.add_summary(_summary, global_step=epoch_step)

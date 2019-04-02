@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 import warnings
 import scipy as sp
 import matplotlib.pyplot as plt
-#from sklearn.preprocessing import StandardScaler
 warnings.filterwarnings('ignore')
 
 
@@ -66,9 +65,7 @@ def outputs(lambde,lambda_koraci,atributi_lambde,no_steps):
     return lambda_koraci, atributi_lambde
             
     
-brojminutaunapred = 200*5
 brojminuta = 120
-brojminutax = brojminuta
 brojminuta2 = 0.75  
 pocetak = '2017-08-01 00:00:00'
 kraj = '2017-12-01 00:00:00'  
@@ -77,18 +74,14 @@ kraj = pd.to_datetime(kraj)
 index2 = pd.date_range(start = pocetak, end = kraj, freq = '0.75min') 
 brojminutax2 = brojminuta2
 brojkoraka = int(brojminuta/5)
-no_steps = int(brojminutaunapred/5)
 
 
 dataset = pd.read_csv("dataset_NiSBG1.csv", header = 0, index_col = 0)
 dataset.index = pd.to_datetime(dataset.index)
-output = pd.DataFrame(np.zeros([dataset.shape[0],no_steps]),index = dataset.index)
-#atributi_lambde = pd.DataFrame(np.zeros([dataset.shape[0],no_steps]),index = dataset.index)
 vreme_izmedju_voz = pd.DataFrame(np.zeros([len(index2),1]), index = index2)
 
 kolone_lev1 = ['broj_ljudi','brzina_sred','brzina_median','brzina_10','brzina_25','brzina_75','brzina_90','brzina_100',
                'lambda']
-#newdf = pd.DataFrame(np.zeros([dataset.shape[0],int(len(kolone_lev1))]),columns = kolone_lev1,index = dataset.index)
 
 
 result = pd.read_csv("result.csv", header = 0)
@@ -100,17 +93,10 @@ result.set_index('date2',inplace = True, drop = False)
 
 brojminuta = pd.Timedelta(minutes = brojminuta)
 brojminuta2 = pd.Timedelta(minutes = brojminuta2)
-#frames =[dataset,newdf]
-#dataset = pd.concat(frames,axis=1)
 dataset = atributi(brojminuta,result,dataset)
 vreme_izmedju_voz = atributi2(brojminuta2,brojminutax2,result,vreme_izmedju_voz)
 lambde = dataset['lambda']
-#scaler = StandardScaler()
-#lambde = scaler.fit_transform(lambde.values.reshape(-1,1))
 lambde = np.squeeze(lambde.transpose())
-#output,atributi_lambde = outputs(lambde,output,atributi_lambde,no_steps)
-#dataset = pd.concat([dataset,atributi_lambde],axis=1)
-#dataset.drop(columns=['lambda'],inplace=True)
 result_stan = result.loc[result.loc[:,'Izlaz-traka']==16]
 
 """ Evaluacija mu vrednosti """

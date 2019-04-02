@@ -13,7 +13,7 @@ def batches(x, batchsize):
         
         
 
-x = np.random.rand(50,1)
+x = np.random.rand(50,3)
 aa = list(batches(x,8))
 
 

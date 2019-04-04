@@ -2,15 +2,14 @@ import numpy as np
 import tensorflow as tf
 import os
 
-
-class LSTM:
+class RNN:
     
-    def __init__(self, input_size=1, output_size=1, lstm_size=128, num_layers=1,
+    def __init__(self, input_size=1, output_size=1, rnn_size=128, num_layers=1,
                  num_steps=1, keep_prob=0.8, batch_size=64, init_learning_rate=0.5,
-                 learning_rate_decay=0.99, init_epoch=5, max_epoch=100, MODEL_DIR = None):
+                 learning_rate_decay=0.99, init_epoch=5, max_epoch=100, MODEL_DIR = None, name = 'rnn_default'):
         self.input_size = input_size 
         self.output_size = output_size
-        self.lstm_size = lstm_size
+        self.rnn_size = rnn_size
         self.num_layers = num_layers
         self.num_steps = num_steps
         self.keep_prob = keep_prob    
@@ -19,15 +18,16 @@ class LSTM:
         self.learning_rate_decay = learning_rate_decay
         self.init_epoch = init_epoch
         self.max_epoch = max_epoch
+        self.name = name
         self.MODEL_DIR = MODEL_DIR
 
 
     """ BUILD GRAPH """
-    def build_lstm_graph_with_config(self):
+    def build_rnn_graph_with_config(self):
         tf.reset_default_graph()
-        self.lstm_graph = tf.Graph()
+        self.rnn_graph = tf.Graph()
     
-        with self.lstm_graph.as_default():
+        with self.rnn_graph.as_default():
     
             learning_rate = tf.placeholder(tf.float32, None, name="learning_rate")
     
@@ -35,10 +35,10 @@ class LSTM:
             targets = tf.placeholder(tf.float32, [None, self.output_size], name="targets")
     
             def _create_one_cell():
-                lstm_cell = tf.contrib.rnn.LSTMCell(self.lstm_size, state_is_tuple=True)
+                rnn_cell = tf.contrib.rnn.BasicRNNCell(self.rnn_size)
                 if self.keep_prob < 1.0:
-                    lstm_cell = tf.contrib.rnn.DropoutWrapper(lstm_cell, output_keep_prob = self.keep_prob)
-                return lstm_cell
+                    rnn_cell = tf.contrib.rnn.DropoutWrapper(rnn_cell, output_keep_prob = self.keep_prob)
+                return rnn_cell
     
             cell = tf.contrib.rnn.MultiRNNCell(
                 [_create_one_cell() for _ in range(self.num_layers)],
@@ -47,19 +47,19 @@ class LSTM:
     
             val, _ = tf.nn.dynamic_rnn(cell, inputs, dtype=tf.float32, scope="rnn")
     
-            # Before transpose, val.get_shape() = (batch_size, num_steps, lstm_size)
-            # After transpose, val.get_shape() = (num_steps, batch_size, lstm_size)
+            # Before transpose, val.get_shape() = (batch_size, num_steps, rnn_size)
+            # After transpose, val.get_shape() = (num_steps, batch_size, rnn_size)
             val = tf.transpose(val, [1, 0, 2])
     
             with tf.name_scope("output_layer"):
-                # last.get_shape() = (batch_size, lstm_size)
-                last = tf.gather(val, int(val.get_shape()[0]) - 1, name="last_lstm_output")
+                
+                last = tf.gather(val, int(val.get_shape()[0]) - 1, name="last_rnn_output")
     
-                weight = tf.Variable(tf.truncated_normal([self.lstm_size, self.output_size]), name="weights")
+                weight = tf.Variable(tf.truncated_normal([self.rnn_size, self.output_size]), name="weights")
                 bias = tf.Variable(tf.constant(0.1, shape=[self.output_size]), name="biases")
                 prediction = tf.add(tf.matmul(last, weight), bias, name="prediction")
     
-                tf.summary.histogram("last_lstm_output", last)
+                tf.summary.histogram("last_rnn_output", last)
                 tf.summary.histogram("weights", weight)
                 tf.summary.histogram("biases", bias)
     
@@ -74,32 +74,32 @@ class LSTM:
             for op in [prediction, loss]:
                 tf.add_to_collection('ops_to_restore', op)
     
-        return self.lstm_graph
+        return self.rnn_graph
 
 
     """ TRAIN GRAPH """    
-    def train_lstm_graph(name, self, train_X, train_y, test_X, test_y):
+    def train_rnn_graph(self, train_X, train_y, test_X, test_y):
         """
         name (str)
-        lstm_graph (tf.Graph)
+        rnn_graph (tf.Graph)
         """
-        def batches(x, batchsize):
+        def batches(x,y, batchsize):
             for i in range(0, x.shape[0], batchsize):
-                yield x[i:i+batchsize]
+                yield x[i:i+batchsize], y[i:i+batchsize]
     
         final_prediction = []
         final_loss = None
     
-        self.graph_name = "%s_lr%.2f_lr_decay%.3f_lstm%d_step%d_input%d_batch%d_epoch%d" % (
-            name,
+        self.graph_name = "%s_lr%.2f_lr_decay%.3f_rnn%d_step%d_input%d_batch%d_epoch%d" % (
+            self.name,
             self.init_learning_rate, self.learning_rate_decay,
-            self.lstm_size, self.num_steps,
+            self.rnn_size, self.num_steps,
             self.input_size, self.batch_size, self.max_epoch)
     
         print("Graph Name:", self.graph_name)
     
-        learning_rates_to_use = LSTM._compute_learning_rates(self)
-        with tf.Session(graph = self.lstm_graph) as sess:
+        learning_rates_to_use = RNN._compute_learning_rates(self)
+        with tf.Session(graph = self.rnn_graph) as sess:
             merged_summary = tf.summary.merge_all()
             writer = tf.summary.FileWriter('_logs/' + self.graph_name, sess.graph)
             writer.add_graph(sess.graph)
@@ -121,13 +121,11 @@ class LSTM:
             minimize = graph.get_operation_by_name('train/loss_mse_adam_minimize')
             prediction = graph.get_tensor_by_name('output_layer/prediction:0')
             
-            train_X = list(batches(train_X,self.batch_size))
-            train_y = list(batches(train_y,self.batch_size))
-            
+
             for epoch_step in range(self.max_epoch):
                 current_lr = learning_rates_to_use[epoch_step]
     
-                for batch_X, batch_y in train_X, train_y:
+                for batch_X, batch_y in list(batches(train_X, train_y, self.batch_size)):
                     train_data_feed = {
                         inputs: batch_X,
                         targets: batch_y,
@@ -135,20 +133,15 @@ class LSTM:
                     }
                     train_loss, _ = sess.run([loss, minimize], train_data_feed)
     
-                if epoch_step % 10 == 0:
+                if epoch_step % 20 == 0:
                     test_loss, _pred, _summary = sess.run([loss, prediction, merged_summary], test_data_feed)
                     print("Epoch %d [%f]:" % (epoch_step, current_lr), test_loss)
-                    if epoch_step % 50 == 0:
-                        print("Predictions:", [(
-                            map(lambda x: round(x, 4), _pred[-j]),
-                            map(lambda x: round(x, 4), test_y[-j])
-                        ) for j in range(5)])
     
                 writer.add_summary(_summary, global_step=epoch_step)
     
             print("Final Results:")
             final_prediction, final_loss = sess.run([prediction, loss], test_data_feed)
-            print(final_prediction, final_loss)
+            print(final_loss)
     
             graph_saver_dir = os.path.join(self.MODEL_DIR, self.graph_name)
             if not os.path.exists(graph_saver_dir):
@@ -156,10 +149,10 @@ class LSTM:
     
             saver = tf.train.Saver()
             saver.save(sess, os.path.join(
-                graph_saver_dir, "LSTM_model_%s.ckpt" % self.graph_name), global_step=epoch_step)
-    
-        with open("final_predictions.{}.csv".format(self.graph_name), 'w') as fout:
-            fout.write(final_prediction.tolist())
+                graph_saver_dir, "rnn_model_%s.ckpt" % self.name), global_step=epoch_step)
+            
+        np.savetxt('{}.csv'.format(os.path.join(
+                graph_saver_dir, "rnn_%s.ckpt" % self.name)),final_prediction)
   
           
     """ PREDICT """         
@@ -171,7 +164,7 @@ class LSTM:
             # Load meta graph
             graph_meta_path = os.path.join(
                 self.MODEL_DIR, self.graph_name,
-                'LSTM_model_{0}.ckpt-{1}.meta'.format(self.graph_name, max_epoch-1))
+                'rnn_model_{0}.ckpt-{1}.meta'.format(self.name, max_epoch-1))
             checkpoint_path = os.path.join(self.MODEL_DIR, self.graph_name)
     
             saver = tf.train.import_meta_graph(graph_meta_path)

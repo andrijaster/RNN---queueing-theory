@@ -7,6 +7,7 @@ Created on Tue Mar 19 16:25:39 2019
 
 import pandas as pd
 import numpy as np
+import os
 import matplotlib.pyplot as plt
 import warnings
 import scipy as sp
@@ -75,9 +76,14 @@ output_ext.insert(loc = 0, column = 'lambda' , value = dataset.ix[:,'lambda'])
 output_ext['lambda'] = output_ext['lambda'].shift(+1)
 output_ext.ix[0,'lambda'] = dataset.ix[0,'lambda']
 
-atributes.to_csv('Atribute.csv')
-output.to_csv('Output.csv')
-output_ext.to_csv('Output_ext.csv')
+
+name_atr = os.path.join("C:\\Users\\Andri\\Documents\\GitHub\\RNN---queueing-theory---maximum-principle\\LSTM_problem","Atribute.csv")
+name_out = os.path.join("C:\\Users\\Andri\\Documents\\GitHub\\RNN---queueing-theory---maximum-principle\\LSTM_problem","Output.csv")
+name_out_ext = os.path.join("C:\\Users\\Andri\\Documents\\GitHub\\RNN---queueing-theory---maximum-principle\\LSTM_problem","Output_ext.csv")
+
+atributes.to_csv(name_atr)
+output.to_csv(name_out)
+output_ext.to_csv(name_out_ext)
 
 
 

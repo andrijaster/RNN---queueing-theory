@@ -6,7 +6,7 @@ import os
 class LSTM:
     
     def __init__(self, input_size=1, output_size=1, lstm_size=128, num_layers=1,
-                 num_steps=1, keep_prob=0.8, batch_size=64, init_learning_rate=0.5,
+                 num_steps=None, keep_prob=0.8, batch_size=64, init_learning_rate=0.5,
                  learning_rate_decay=0.99, init_epoch=5, max_epoch=100, MODEL_DIR = None, name = 'LSTM_default'):
         self.input_size = input_size 
         self.output_size = output_size
@@ -91,11 +91,11 @@ class LSTM:
         final_prediction = []
         final_loss = None
     
-        self.graph_name = "%s_lr%.2f_lr_decay%.3f_lstm%d_step%d_input%d_batch%d_epoch%d" % (
+        self.graph_name = "%s_lr%.2f_lr_decay%.3f_lstm%d_step%d_input%d_batch%d_epoch%d_kp%d" % (
             self.name,
             self.init_learning_rate, self.learning_rate_decay,
             self.lstm_size, self.num_steps,
-            self.input_size, self.batch_size, self.max_epoch)
+            self.input_size, self.batch_size, self.max_epoch, self.keep_prob)
     
         print("Graph Name:", self.graph_name)
     

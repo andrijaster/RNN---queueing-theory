@@ -22,8 +22,8 @@ def out_atr(lambde,lambda_koraci,atributi_lambde,no_steps):
             lambda_koraci.values[i,:] = lambde[i:i+no_steps]
         if i>=no_steps:
             atributi_lambde.values[i,:] = lambde[i-no_steps:i]
-    return lambda_koraci, atributi_lambde
-
+    return lambda_koraci, atributi_lambde                
+        
 
 """ Ucitavanjae dataset-a """
 dataset = pd.read_csv("dataset.csv", header = 0, index_col = 0)
@@ -84,6 +84,7 @@ name_out_ext = os.path.join("C:\\Users\\Andri\\Documents\\GitHub\\RNN---queueing
 atributes.to_csv(name_atr)
 output.to_csv(name_out)
 output_ext.to_csv(name_out_ext)
+
 
 
 

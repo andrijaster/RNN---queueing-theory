@@ -15,28 +15,23 @@ warnings.filterwarnings('ignore')
 
 """ Cost function of waiting in line """
 def g_fun(broj_mesta):
-    price_perminute = 10
-    g = np.asarray([price_perminute*x**2 for x in range(broj_mesta)])
+    price_perminute = 40
+    g = np.asarray([price_perminute*x**3 for x in range(broj_mesta)])
     return g
 
 """ Hamiltonian function """
 def Ham_fun(c_var,g,x,p_var,lamb_val,mu_val,broj_mesta):
-    Cc = 100
-    lamb_val = lamb_val/c_var
-    Q = trans_matrix(broj_mesta,mu_val,lamb_val)
-    ham_function = Cc + np.dot(g,x) + p_var.T.dot(Q.T).dot(x)
+    Cc = 70
+    Lamb = lamb_val/c_var
+    Q = trans_matrix(broj_mesta,mu_val,Lamb)
+    ham_function = Cc*c_var + np.dot(g,x) + p_var.T.dot(Q.T).dot(x)
     return ham_function
 
 """ Derivative Hamiltonian function """
 def jac_Ham_fun(c_var,g,x,p_var,lamb_val,mu_val,broj_mesta):
-    Cc = 100
-    vec = [0, lamb_val/c_var**2, -lamb_val/c_var**2]
-    dQdcstart = np.zeros(broj_mesta)
-    dQdcend = np.zeros(broj_mesta)
-    dQdcstart[:2] = [lamb_val/c_var**2, -lamb_val/c_var**2]
-    dQdc = sliding_windows(vec, broj_mesta-2)
-    dQdc = np.vstack((dQdcstart,dQdc,dQdcend))
-    derivative = Cc*c_var + np.dot(g,x) + p_var.T.dot(dQdc.T).dot(x)
+    Cc = 70
+    dQdc = dtransdc(broj_mesta,mu_val,lamb_val,c_var)
+    derivative = Cc + p_var.T.dot(dQdc.T).dot(x)
     return derivative
 
 """ Transition matrix Q """
@@ -50,6 +45,15 @@ def trans_matrix(broj_mesta,mu_val,lamb_val):
     Q = np.vstack((Qstart,Q,Qend))
     return Q
 
+def dtransdc(broj_mesta,mu_val,lamb_val,c_var):
+    vec = [0, lamb_val/c_var**2, -lamb_val/c_var**2]
+    dQdcstart = np.zeros(broj_mesta)
+    dQdcend = np.zeros(broj_mesta)
+    dQdcstart[:2] = [lamb_val/c_var**2, -lamb_val/c_var**2]
+    dQdc = sliding_windows(vec, broj_mesta-2)
+    dQdc = np.vstack((dQdcstart,dQdc,dQdcend))
+    return dQdc
+    
 """ Interpolate between lambdas """
 def Lambda_value(t,vreme,Lambda):
     lambda_val = np.interp(t,vreme,Lambda)
@@ -80,11 +84,11 @@ def model(t,z,vreme,Lambda,mu_val,broj_mesta,g_function):
     p = z[broj_mesta:]
     lamb_val = Lambda_value(t,vreme,Lambda)
     bnd = ((1,10),)
-    x0 = 1
-    c_var = minimize(Ham_fun,x0,method='TNC', 
-                     args = (g_function,x,p,lamb_val,mu_val,broj_mesta),bounds = bnd)  
-#    c_var = minimize(Ham_fun, jac=jac_Ham_fun, x0,method='TNC', 
-#                 args = (g_function,x,p,lamb_val,mu_val,broj_mesta),bounds = bnd) 
+    x0 = 3
+#    c_var = minimize(Ham_fun,x0,method='TNC', 
+#                     args = (g_function,x,p,lamb_val,mu_val,broj_mesta),bounds  
+    c_var = minimize(Ham_fun,x0,method='TNC',jac = jac_Ham_fun, 
+                 args = (g_function,x,p,lamb_val,mu_val,broj_mesta),bounds = bnd) 
     c_var = c_var.x
     lambda_val = lamb_val/c_var
     Q = trans_matrix(broj_mesta, mu_val, lambda_val)
@@ -116,11 +120,11 @@ def evaluate(x,p,Lambda,vreme,t_tot,g_function):
     for t in t_tot:
         lamb_val = Lambda_value(t,vreme,Lambda)
         bnd = ((1,10),)
-        x0 = 1
-        resenje = minimize(Ham_fun,x0,method='TNC', 
-                     args = (g_function,x[i,:],p[i,:],lamb_val,mu_val,broj_mesta),bounds = bnd)
-#        resenje = minimize(Ham_fun, jac = jac_Ham_fun, x0,method='TNC', 
-#                 args = (g_function,x[i,:],p[i,:],lamb_val,mu_val,broj_mesta),bounds = bnd)
+        x0 = 3
+#        resenje = minimize(Ham_fun,x0,method='TNC', 
+#                     args = (g_function,x[i,:],p[i,:],lamb_val,mu_val,broj_mesta),bounds = bnd)
+        resenje = minimize(Ham_fun, x0,method='TNC', jac = jac_Ham_fun,
+                 args = (g_function,x[i,:],p[i,:],lamb_val,mu_val,broj_mesta),bounds = bnd)
         c_var[i] = resenje.x
         i+=1
     return c_var
@@ -129,13 +133,12 @@ def evaluate_f_max(x,t_tot,g_function,c_var):
     i = 0
     vrednost = np.zeros(len(t_tot))
     for t in t_tot:
-        Cc = 100
+        Cc = 70
         vrednost[i] = Cc*c_var[i] + np.dot(g_function,x[i,:])
         i +=1
     return vrednost
         
     
-
 
 
 """ Data """
@@ -161,7 +164,11 @@ time_init = np.concatenate((t_x_init, t_p_init),axis = None)
 mu_val = 4.051
 g_function = g_fun(broj_mesta)
 
-t = np.linspace(0,199*5,2000)
+X_pocetno = np.random.rand(broj_mesta)
+X_pocetno = X_pocetno/sum(X_pocetno)
+p_pocetno = np.random.rand(broj_mesta)
+
+t = np.linspace(0,199*5,1000)
 diff = ode(model).set_integrator('dopri5')
 diff.set_initial_value(var_init, time_init)
 diff.set_f_params(vreme, Lambda, mu_val, broj_mesta,g_function)

@@ -90,11 +90,11 @@ class RNN:
         final_prediction = []
         final_loss = None
     
-        self.graph_name = "%s_lr%.2f_lr_decay%.3f_rnn%d_step%d_input%d_batch%d_epoch%d" % (
+        self.graph_name = "%s_lr%.2f_lr_decay%.3f_lstm%d_step%d_input%d_batch%d_epoch%d_kp%.3f_layer%d" % (
             self.name,
             self.init_learning_rate, self.learning_rate_decay,
-            self.rnn_size, self.num_steps,
-            self.input_size, self.batch_size, self.max_epoch)
+            self.lstm_size, self.num_steps,
+            self.input_size, self.batch_size, self.max_epoch, self.keep_prob, self.num_layers)
     
         print("Graph Name:", self.graph_name)
     

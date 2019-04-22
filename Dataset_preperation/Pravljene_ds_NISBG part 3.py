@@ -52,8 +52,8 @@ ax2.set_ylabel('$\mathbf{\lambda_i} - \mathbf{\lambda_{i-1}}$ [1/min]')
 ax2.grid()
 
 """ Deljenje i pravljenje novih atributa """
-
-brojminutaunapred = 200*5 # zadati vreme predvidjanja
+ou
+brojminutaunapred = 405 # zadati vreme predvidjanja
 no_steps = int(brojminutaunapred/5) # broj koraka unpared za output
 no_steps_atribute = no_steps # broj koraka unpared za atribute
 

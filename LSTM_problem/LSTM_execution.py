@@ -25,14 +25,16 @@ if __name__ == "__main__":
     
     atributes = pd.read_csv('Atribute.csv',index_col=0)
     output = pd.read_csv('Output.csv',index_col=0) 
-    num_unroll = 300
+    num_unroll = 320
     test_size1 = 0.2
     test_size2 = 0.35
     train1 = Train_test(num_unroll,test_size1,test_size2)
     train_X, test_X, train_y, test_y, train_X_mean, train_X_var, train_y_mean, train_y_var = train1.train_test_fun(atributes, output)
     
-    steps_size = np.array([2**i for i in range(4,7)])
+    steps_size = np.array([2**i for i in range(4,8)])
+#    steps_size = 128
     steps_layers = np.arange(1,4)
+#    steps_layers = 2
     R2_score_1 = np.zeros([len(steps_layers), len(steps_size)])
     R2_score_2 = np.zeros([len(steps_layers), len(steps_size)])
     MAE_1 = np.zeros([len(steps_layers), len(steps_size)])
@@ -55,11 +57,11 @@ if __name__ == "__main__":
             directory = os.getcwd()
     
             model1 = LSTM(input_size=in_size, output_size=out_size, lstm_size=size, num_layers=layers,
-                             num_steps=num_unroll, keep_prob=0.8, batch_size=256, init_learning_rate=0.5,
-                             learning_rate_decay=0.992, init_epoch=7, max_epoch=no_epoch, MODEL_DIR = directory, name = name1)
+                             num_steps=num_unroll, keep_prob=0.8, batch_size=256, init_learning_rate=0.25,
+                             learning_rate_decay=0.99, init_epoch=7, max_epoch=no_epoch, MODEL_DIR = directory, name = name1)
             model2 = LSTM(input_size=in_size, output_size=out_size, lstm_size=size, num_layers=layers,
-                             num_steps=num_unroll, keep_prob=1, batch_size=256, init_learning_rate=0.5,
-                             learning_rate_decay=0.992, init_epoch=7, max_epoch=no_epoch, MODEL_DIR = directory, name = name2)
+                             num_steps=num_unroll, keep_prob=1, batch_size=256, init_learning_rate=0.25,
+                             learning_rate_decay=0.99, init_epoch=7, max_epoch=no_epoch, MODEL_DIR = directory, name = name2)
             
             model1.build_lstm_graph_with_config()
             model1.train_lstm_graph(train_X_mean, train_y_mean, train_X_var, train_y_var)

@@ -31,8 +31,8 @@ if __name__ == "__main__":
     train1 = Train_test(num_unroll,test_size1,test_size2)
     train_X, test_X, train_y, test_y, train_X_mean, train_X_var, train_y_mean, train_y_var = train1.train_test_fun(atributes, output)
     
-    steps_size = np.array([2**i for i in range(4,10)])
-    steps_layers = np.arange(1,5)
+    steps_size = np.array([2**i for i in range(4,7)])
+    steps_layers = np.arange(1,4)
     R2_score_1 = np.zeros([len(steps_layers), len(steps_size)])
     R2_score_2 = np.zeros([len(steps_layers), len(steps_size)])
     MAE_1 = np.zeros([len(steps_layers), len(steps_size)])

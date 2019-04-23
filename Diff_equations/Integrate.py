@@ -176,7 +176,7 @@ class Maximum_principle():
                 Q = [Maximum_principle.trans_matrix(broj_mesta, mu_val, lamb_val,c_var) for c_var in c_var_pos]
                 xpom = [Maximum_principle.ode45_step(f, x[i], t[i], dt, Q[j]) for j in range(len(c_var_pos))]                
                 obj_fun = [Obj_function(c_var_pos[j],g_function,xpom[j],lamb_val,mu_val,Cc) for j in range(len(c_var_pos))] 
-                obj_fun = obj_fun + 1*np.abs(obj_fun - obj_fun[int(c_var[i]-1)])
+                obj_fun = obj_fun + 0.8*np.abs(obj_fun - obj_fun[int(c_var[i]-1)])
                 arg_min = np.argmin(obj_fun)
                 c_var[i+1] = c_var_pos[arg_min]
                 x[i+1] = xpom[arg_min]
@@ -319,7 +319,7 @@ if __name__ == "__main__":
     vreme = np.linspace(0,199*5,200)
     time_control = np.linspace(0,400,10000)
     broj_mesta = 30
-    mu_val = 4.051
+    mu_val = 4.05103447
     Cc = 30
     price_minute = 3
     c_var_pos = np.arange(1,12)

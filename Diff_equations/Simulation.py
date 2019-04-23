@@ -130,33 +130,33 @@ class Simulation():
 #                
                         
                 
-                        
-""" Data """
-output = pd.read_csv("Output_ext.csv", index_col = 0)
-Lambda = output['lambda'].values[:200]
-vreme = np.linspace(0,199*5,200)
-
-#c_var = pd.read_csv("C_varijable.csv", index_col = 0)
-loc_exp = 0.31666666666666665
-scale_exp = 0.24685052850561828
-c_var = np.loadtxt('c_var.csv')
-vreme_c = np.linspace(0,400,10000)
-state = 30
-
-model1 = Simulation(10000,400,0.01,loc_exp, scale_exp, Lambda, vreme, c_var, vreme_c, state)
-Nws, Nw, Probability = model1.sim()
-t = np.arange(Nws.shape[0])
-
-
-strs = ["$P_{%.d}$" % (float(x)) for x in range(model1.state)]
-
-figure = plt.figure(figsize=(13, 16))
-ax1 = plt.subplot(111)
-ax1.plot(t,Probability.T)
-ax1.set_ylabel('$P_i$')
-ax1.set_xlabel('$t$ [min]')
-ax1.grid()
-ax1.legend(strs, ncol = 3, loc = 'upper right')
+if __name__ == '__main__':
+    """ Data """
+    output = pd.read_csv("Output_ext.csv", index_col = 0)
+    Lambda = output['lambda'].values[:200]
+    vreme = np.linspace(0,199*5,200)
+    
+    #c_var = pd.read_csv("C_varijable.csv", index_col = 0)
+    loc_exp = 0.31666666666666665
+    scale_exp = 0.24685052850561828
+    c_var = np.loadtxt('c_var.csv')
+    vreme_c = np.linspace(0,400,10000)
+    state = 30
+    
+    model1 = Simulation(10000,400,0.01,loc_exp, scale_exp, Lambda, vreme, c_var, vreme_c, state)
+    Nws, Nw, Probability = model1.sim()
+    t = np.arange(Nws.shape[0])
+    
+    
+    strs = ["$P_{%.d}$" % (float(x)) for x in range(model1.state)]
+    
+    figure = plt.figure(figsize=(13, 16))
+    ax1 = plt.subplot(111)
+    ax1.plot(t,Probability.T)
+    ax1.set_ylabel('$P_i$')
+    ax1.set_xlabel('$t$ [min]')
+    ax1.grid()
+    ax1.legend(strs, ncol = 3, loc = 'upper right')
 
 
         

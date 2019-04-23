@@ -36,7 +36,7 @@ for i in range(mean_Lambda.shape[0]):
 vreme = np.linspace(0,199*5,200)
 time_control = np.linspace(0,400,10000)
 broj_mesta = 15
-mu_val = 4.051
+mu_val = 4.05103447
 Cc = 30
 price_minute = 3
 c_var_pos = np.arange(1,12)

@@ -274,8 +274,40 @@ class Maximum_principle():
         self.g_function = Maximum_principle.g_fun(fun,self.broj_mesta,self.price_minute)        
         self.x_3, self.c_var_3, self.values_3 = ode45(model, self.time_control, var_init, 
                        self.vreme, self.Lambda, self.mu_val, self.broj_mesta, self.g_function, self.Cc, self.c_var_2)
-                
         
+    def Evaluate_values(self,var_init,c_var,fun):
+        
+        def ode45(f, t, x0, vreme, Lambda, mu_val,broj_mesta, g_function, Cc, c_var):
+            """
+            4th Order Runge-Kutta method
+            """
+            n = len(t)
+            x = np.zeros((n, len(x0)))
+            values = np.zeros(n)
+            x[0] = x0
+            values[0] = Cc*c_var[0]
+            for i in range(n-1):
+                dt = t[i+1] - t[i]
+                lamb_val = Maximum_principle.Lambda_value(t[i],vreme,Lambda)
+                Q = Maximum_principle.trans_matrix(broj_mesta, mu_val, lamb_val,c_var[i+1])
+                x[i+1] = Maximum_principle.ode45_step(f, x[i], t[i], dt, Q)                
+                values[i+1] = Maximum_principle.Ham_fun(c_var[i+1], g_function, x[i+1], lamb_val, mu_val, Cc) 
+            return x, values
+
+        """ Model for solver """
+        def model(t,x,Q):           
+            """ Solving diff equation:
+                Q is Transtion matrix """                              
+            dXdt = np.dot(Q.T,x)
+            return dXdt
+                      
+        self.g_function = Maximum_principle.g_fun(fun,self.broj_mesta,self.price_minute)  
+        x, values = ode45(model, self.time_control, var_init, 
+                       self.vreme, self.Lambda, self.mu_val, self.broj_mesta, self.g_function, self.Cc, c_var)                        
+        return x, values
+    
+    
+    
 if __name__ == "__main__":
     """ Data """
     def fun(i,price_minute):
@@ -306,12 +338,10 @@ if __name__ == "__main__":
     model1.Optimal_control_round_obj2(var_init,time_init,fun)
     
     
-    dt = time_control[1] - time_control[0]
-    
-    Total_value_1 = np.sum(model1.values*dt)
-    Total_value_2 = np.sum(model1.values_2*dt)
-    Total_value_3 = np.sum(model1.values_3*dt)
-    Total_value_4 = np.sum(model1.values_4*dt)
+    Total_value_1 = np.trapz(model1.values,time_control)
+    Total_value_2 = np.trapz(model1.values_2,time_control)
+    Total_value_3 = np.trapz(model1.values_3,time_control)
+    Total_value_4 = np.trapz(model1.values_4,time_control)
     
     np.savetxt('c_var.csv',model1.c_var_2)
     
@@ -321,7 +351,7 @@ if __name__ == "__main__":
     print("Total_value_4 = {}".format(Total_value_4))
     
     """ Graph drawing """
-    strs = ["$P_{}$".format(x) for x in range(model1.broj_mesta)]
+    strs = ["$P_{%.d}$" % (float(x)) for x in range(broj_mesta)]
     figure = plt.figure(figsize=(13, 9))
     ax1 = plt.subplot(311)
     ax1.plot(model1.time_control,model1.x)
@@ -337,16 +367,16 @@ if __name__ == "__main__":
     ax2.set_xlim(0,model1.time_control[-1])
     ax2.set_ylabel('$c(t)$')
     ax2.grid()
-    ax2.legend('upravljanje',  loc = 'upper right')
+
     
     ax3 = plt.subplot(313)
-    ax3.plot(model1.time_control,model1.values, lw = 5)
+    ax3.plot(model1.time_control,model1.values)
     ax3.set_ylim(0,np.max(model1.values)+50)
     ax3.set_xlim(0,model1.time_control[-1])
-    ax3.set_ylabel('$Valeu(t)$')
+    ax3.set_ylabel('$Value$ [EUR/minute]' )
     ax3.set_xlabel('$t$ [min]')
     ax3.grid()
-    ax3.legend('vrednosti',  loc = 'upper right')
+
     
     figure2 = plt.figure(figsize=(13, 9))
     ax4 = plt.subplot(311)
@@ -363,16 +393,16 @@ if __name__ == "__main__":
     ax5.set_xlim(0,model1.time_control[-1])
     ax5.set_ylabel('$c(t)$')
     ax5.grid()
-    ax5.legend('upravljanje',  loc = 'upper right')
+
     
     ax6 = plt.subplot(313)
-    ax6.plot(model1.time_control,model1.values_2, lw = 5)
+    ax6.plot(model1.time_control,model1.values_2)
     ax6.set_ylim(0,np.max(model1.values_2)+50)
     ax6.set_xlim(0,model1.time_control[-1])
-    ax6.set_ylabel('$Value(t)$')
+    ax6.set_ylabel('$Value$ [EUR/minute]' )
     ax6.set_xlabel('$t$ [min]')
     ax6.grid()
-    ax6.legend('vrednosti',  loc = 'upper right')
+
     
     figure3 = plt.figure(figsize=(13, 9))
     ax4 = plt.subplot(311)
@@ -389,16 +419,16 @@ if __name__ == "__main__":
     ax5.set_xlim(0,model1.time_control[-1])
     ax5.set_ylabel('$c(t)$')
     ax5.grid()
-    ax5.legend('upravljanje',  loc = 'upper right')
+
     
     ax6 = plt.subplot(313)
-    ax6.plot(model1.time_control,model1.values_3, lw = 5)
+    ax6.plot(model1.time_control,model1.values_3)
     ax6.set_ylim(0,np.max(model1.values_3)+50)
     ax6.set_xlim(0,model1.time_control[-1])
     ax6.set_ylabel('$Value(t)$')
     ax6.set_xlabel('$t$ [min]')
     ax6.grid()
-    ax6.legend('vrednosti',  loc = 'upper right')
+
     
     figure4 = plt.figure(figsize=(13, 9))
     ax4 = plt.subplot(311)
@@ -415,13 +445,12 @@ if __name__ == "__main__":
     ax5.set_xlim(0,model1.time_control[-1])
     ax5.set_ylabel('$c(t)$')
     ax5.grid()
-    ax5.legend('upravljanje',  loc = 'upper right')
+
     
     ax6 = plt.subplot(313)
-    ax6.plot(model1.time_control,model1.values_4, lw = 5)
+    ax6.plot(model1.time_control,model1.values_4)
     ax6.set_ylim(0,np.max(model1.values_4)+50)
     ax6.set_xlim(0,model1.time_control[-1])
-    ax6.set_ylabel('$Value(t)$')
+    ax1.set_ylabel('$Value$ [EUR/minute]' )
     ax6.set_xlabel('$t$ [min]')
     ax6.grid()
-    ax6.legend('vrednosti',  loc = 'upper right')

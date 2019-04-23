@@ -148,7 +148,7 @@ Nws, Nw, Probability = model1.sim()
 t = np.arange(Nws.shape[0])
 
 
-strs = ["$P_{}$".format(x) for x in range(model1.state)]
+strs = ["$P_{%.d}$" % (float(x)) for x in range(model1.state)]
 
 figure = plt.figure(figsize=(13, 16))
 ax1 = plt.subplot(111)

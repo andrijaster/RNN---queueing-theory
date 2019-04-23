@@ -66,7 +66,7 @@ class GRU:
     
             with tf.name_scope("train"):
                 # loss = -tf.reduce_sum(targets * tf.log(tf.clip_by_value(prediction, 1e-10, 1.0)))
-                loss = tf.reduce_mean(tf.square(prediction - targets), name="loss_mse")
+                loss = tf.reduce_mean(tf.square(prediction - targets) + 1e-8, name="loss_mse")
                 optimizer = tf.train.AdamOptimizer(learning_rate)
                 minimize = optimizer.minimize(loss, name="loss_mse_adam_minimize")
                 tf.summary.scalar("loss_mse", loss)

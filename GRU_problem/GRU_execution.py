@@ -25,7 +25,7 @@ if __name__ == "__main__":
     
     atributes = pd.read_csv('Atribute.csv',index_col=0)
     output = pd.read_csv('Output.csv',index_col=0) 
-    num_unroll = 300
+    num_unroll = 320
     test_size1 = 0.2
     test_size2 = 0.35
     train1 = Train_test(num_unroll,test_size1,test_size2)
@@ -55,10 +55,10 @@ if __name__ == "__main__":
             directory = os.getcwd()
     
             model1 = GRU(input_size=in_size, output_size=out_size, gru_size=size, num_layers=layers,
-                             num_steps=num_unroll, keep_prob=0.8, batch_size=256, init_learning_rate=0.5,
+                             num_steps=num_unroll, keep_prob=0.8, batch_size=256, init_learning_rate=0.1,
                              learning_rate_decay=0.992, init_epoch=7, max_epoch=no_epoch, MODEL_DIR = directory, name = name1)
             model2 = GRU(input_size=in_size, output_size=out_size, gru_size=size, num_layers=layers,
-                             num_steps=num_unroll, keep_prob=1, batch_size=256, init_learning_rate=0.5,
+                             num_steps=num_unroll, keep_prob=1, batch_size=256, init_learning_rate=0.1,
                              learning_rate_decay=0.992, init_epoch=7, max_epoch=no_epoch, MODEL_DIR = directory, name = name2)
             
             model1.build_gru_graph_with_config()

@@ -100,11 +100,12 @@ ax = plt.subplot(111)
 ax.set_xlim(0.3, 1.3)
 
 
-ax.hist(data_org, bins = edges, label = 'emp', alpha = 0.5, histtype ='bar', ec = 'black', density = True)
+ax.hist(data_org, bins = edges, label = 'Емпиријска', alpha = 0.5, histtype ='bar', ec = 'black', density = True)
 #ax.hist(data1, bins = edges, density = True, lw=5, alpha=0.5, label='expon pdf')
 
-ax.plot(data2, dist.pdf(data2),'r-', lw=5, alpha=0.5, label='expon pdf')
+ax.plot(data2, dist.pdf(data2),'r-', lw=5, alpha=0.5, label='Експоненцијална теор.')
 ax.legend(loc='best')
+ax.set_xlabel('Време [min]')
 ax.grid()
 
 

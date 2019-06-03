@@ -52,14 +52,18 @@ ax2.set_ylabel('$\mathbf{\lambda_i} - \mathbf{\lambda_{i-1}}$ [1/min]')
 ax2.grid()
 
 """ Deljenje i pravljenje novih atributa """
-ou
-brojminutaunapred = 405 # zadati vreme predvidjanja
+
+brojminutaunapred = 305 # zadati vreme predvidjanja
 no_steps = int(brojminutaunapred/5) # broj koraka unpared za output
 no_steps_atribute = no_steps # broj koraka unpared za atribute
 
 
 atributi_lambde = pd.DataFrame(np.zeros([dataset1.shape[0],no_steps_atribute]),index = dataset1.index)
 output = pd.DataFrame(np.zeros([dataset1.shape[0],no_steps]),index = dataset1.index)
+broj_kanala = pd.DataFrame(np.zeros([dataset1.shape[0],no_steps]),index = dataset1.index)
+
+broj_traka = dataset['broj_traka']
+broj_kanala, _ = out_atr(broj_traka,broj_kanala,atributi_lambde,no_steps)
 output, atributi_lambde = out_atr(diff,output,atributi_lambde,no_steps)
 output = output.iloc[:-no_steps,:]
 output = output.iloc[no_steps:,:]
@@ -67,6 +71,9 @@ atributi_lambde = atributi_lambde.iloc[no_steps:,:]
 atributi_lambde = atributi_lambde.iloc[:-no_steps]
 dataset = dataset.iloc[:-no_steps,:]
 dataset = dataset.iloc[no_steps:,:]
+broj_kanala = broj_kanala.iloc[:-no_steps,:]
+broj_kanala = broj_kanala.iloc[no_steps:,:]
+
 
 atributes = dataset1.iloc[:,:31].join(atributi_lambde, how = 'inner')
 
@@ -77,13 +84,16 @@ output_ext['lambda'] = output_ext['lambda'].shift(+1)
 output_ext.ix[0,'lambda'] = dataset.ix[0,'lambda']
 
 
-name_atr = os.path.join("C:\\Users\\Andri\\Documents\\GitHub\\RNN---queueing-theory---maximum-principle\\LSTM_problem","Atribute.csv")
-name_out = os.path.join("C:\\Users\\Andri\\Documents\\GitHub\\RNN---queueing-theory---maximum-principle\\LSTM_problem","Output.csv")
-name_out_ext = os.path.join("C:\\Users\\Andri\\Documents\\GitHub\\RNN---queueing-theory---maximum-principle\\LSTM_problem","Output_ext.csv")
+
+#name_atr = os.path.join("C:\\Users\\Andri\\Documents\\GitHub\\RNN---queueing-theory---maximum-principle\\LSTM_problem","Atribute.csv")
+#name_out = os.path.join("C:\\Users\\Andri\\Documents\\GitHub\\RNN---queueing-theory---maximum-principle\\LSTM_problem","Output.csv")
+#name_out_ext = os.path.join("C:\\Users\\Andri\\Documents\\GitHub\\RNN---queueing-theory---maximum-principle\\LSTM_problem","Output_ext.csv")
+#name_broj_traka = os.path.join("C:\\Users\\Andri\\Documents\\GitHub\\RNN---queueing-theory---maximum-principle\\Diff_equations","Track_no.csv")
 
 atributes.to_csv(name_atr)
 output.to_csv(name_out)
 output_ext.to_csv(name_out_ext)
+broj_kanala.to_csv(name_broj_traka)
 
 
 

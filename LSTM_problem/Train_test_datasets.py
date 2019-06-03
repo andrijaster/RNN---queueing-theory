@@ -24,7 +24,7 @@ class Train_test():
     
     
     def train_test_fun(self, atributes, output):
-        output, atributes = Train_test.num_unroll_fun(atributes.values, output.values, self.num_unroll)
+        output, atributes = Train_test.num_unroll_fun(atributes, output, self.num_unroll)
         atributes = np.array(atributes)
         
         train_X, test_X, train_y, test_y = train_test_split(atributes, output, shuffle = False, test_size = self.test_size_1)

@@ -40,6 +40,7 @@ def atributi(brojminuta,result,dataset1):
         dataset1.ix[i,'brzina_90'] = brzina_90
         dataset1.ix[i,'brzina_100'] = brzina_100
         dataset1.ix[i,'lambda'] = 1 / grupe['vreme_izmedju'].mean()
+        dataset1.ix[i,'broj_traka'] = broj_traka
     
     return dataset1
 
@@ -65,7 +66,7 @@ def outputs(lambde,lambda_koraci,atributi_lambde,no_steps):
     return lambda_koraci, atributi_lambde
             
     
-brojminuta = 120
+brojminuta = 180
 brojminuta2 = 0.75  
 pocetak = '2017-08-01 00:00:00'
 kraj = '2017-12-01 00:00:00'  
@@ -81,7 +82,7 @@ dataset.index = pd.to_datetime(dataset.index)
 vreme_izmedju_voz = pd.DataFrame(np.zeros([len(index2),1]), index = index2)
 
 kolone_lev1 = ['broj_ljudi','brzina_sred','brzina_median','brzina_10','brzina_25','brzina_75','brzina_90','brzina_100',
-               'lambda']
+               'lambda','broj_traka']
 
 
 result = pd.read_csv("result.csv", header = 0)
@@ -94,6 +95,10 @@ result.set_index('date2',inplace = True, drop = False)
 brojminuta = pd.Timedelta(minutes = brojminuta)
 brojminuta2 = pd.Timedelta(minutes = brojminuta2)
 dataset = atributi(brojminuta,result,dataset)
+broj_slobodnih_traka = dataset['broj_traka']
+#dataset.drop('broj_traka', inplace = True)
+
+
 vreme_izmedju_voz = atributi2(brojminuta2,brojminutax2,result,vreme_izmedju_voz)
 lambde = dataset['lambda']
 lambde = np.squeeze(lambde.transpose())

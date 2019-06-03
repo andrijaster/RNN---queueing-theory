@@ -141,7 +141,7 @@ if __name__ == '__main__':
     scale_exp = 0.24685052850561828
     c_var = np.loadtxt('c_var.csv')
     vreme_c = np.linspace(0,400,10000)
-    state = 30
+    state = 10
     
     model1 = Simulation(10000,400,0.01,loc_exp, scale_exp, Lambda, vreme, c_var, vreme_c, state)
     Nws, Nw, Probability = model1.sim()

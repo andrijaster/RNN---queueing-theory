@@ -1,0 +1,2 @@
+model_checkpoint_path: "C:\\Users\\Andri\\Documents\\GitHub\\RNN---queueing-theory---maximum-principle\\LSTM_problem\\graph_1_lr0.10_lr_decay0.992_lstm16_step320_input92_batch256_epoch1_kp0.800_layer1\\LSTM_model_graph_1.ckpt-0"
+all_model_checkpoint_paths: "C:\\Users\\Andri\\Documents\\GitHub\\RNN---queueing-theory---maximum-principle\\LSTM_problem\\graph_1_lr0.10_lr_decay0.992_lstm16_step320_input92_batch256_epoch1_kp0.800_layer1\\LSTM_model_graph_1.ckpt-0"

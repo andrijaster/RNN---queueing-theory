@@ -188,7 +188,8 @@ class Optimal_control_discretize():
             c_val = np.interp(t,vreme,c)
             return c_val
         
-        def function_evaluate(g_function, x, Cc, c_var):
+        def function_evaluate(g_function, x, Cc, c, vreme_c, t):
+            c_var = C_value(t, vreme_c, c)
             function_out = c_var*(Cc + np.dot(g_function,x))
             return function_out
         
@@ -206,14 +207,48 @@ class Optimal_control_discretize():
         def value(c_var, dspan, vreme, vreme_c, Lambda, mu_val, broj_mesta, g_function, Cc):
             Out = odeint(model, var_init, dspan,
                        args = (vreme_c, vreme, c_var, Lambda, mu_val, broj_mesta))
-            function = [function_evaluate(g_function, Out[i,:], Cc, c_var[i]) for i in range(len(c_var))]
+            function = [function_evaluate(g_function, Out[i,:], Cc, c_var, vreme_c, self.time_control[i]) for i in range(len(self.time_control))]
             return function, Out
        
         vreme_c = np.linspace(self.vreme[0], self.vreme[-1], c_no)
         
         self.g_function = Optimal_control_discretize.g_fun(fun,self.broj_mesta,self.price_minute)  
         self.values_eva, self.x = value(c_var_ad, self.time_control,self.vreme, vreme_c, self.Lambda, self.mu_val, self.broj_mesta, self.g_function, self.Cc)
-        self.tot_value_eva = np.trapz(self.values_eva, vreme_c)
+        self.tot_value_eva = np.trapz(self.values_eva, self.time_control)
+        
+    def evaluate_function_round(self, var_init, fun, c_var_ad, c_no):
+        """ Interpolate between c """
+        def C_value(t,vreme,c):
+            c_val = np.round(np.interp(t,vreme,c))
+            return c_val
+        
+        def function_evaluate(g_function, x, Cc, c, vreme_c, t):
+            c_var = C_value(t, vreme_c, c)
+            function_out = c_var*(Cc + np.dot(g_function,x))
+            return function_out
+        
+        """ Model for solver """
+        def model(x, t, vreme_c, vreme, c_var, Lambda, mu_val, broj_mesta):           
+            """ Solving diff equation:
+                Q is Transtion matrix """ 
+            c_var_1 = C_value(t,vreme_c,c_var)     
+            lamb_val = Optimal_control_discretize.Lambda_value(t,vreme,Lambda)  
+            lamb_val = lamb_val/c_var_1 
+            Q = Optimal_control_discretize.trans_matrix(broj_mesta,mu_val,lamb_val)                   
+            dXdt = np.dot(Q.T,x)
+            return dXdt
+        
+        def value(c_var, dspan, vreme, vreme_c, Lambda, mu_val, broj_mesta, g_function, Cc):
+            Out = odeint(model, var_init, dspan,
+                       args = (vreme_c, vreme, c_var, Lambda, mu_val, broj_mesta))
+            function = [function_evaluate(g_function, Out[i,:], Cc, c_var, vreme_c, self.time_control[i]) for i in range(len(self.time_control))]
+            return function, Out
+       
+        vreme_c = np.linspace(self.vreme[0], self.vreme[-1], c_no)
+        
+        self.g_function = Optimal_control_discretize.g_fun(fun,self.broj_mesta,self.price_minute)  
+        self.values_eva, self.x = value(c_var_ad, self.time_control,self.vreme, vreme_c, self.Lambda, self.mu_val, self.broj_mesta, self.g_function, self.Cc)
+        self.tot_value_eva = np.trapz(self.values_eva, self.time_control)
 
         
         
